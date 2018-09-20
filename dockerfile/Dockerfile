@@ -18,8 +18,8 @@ RUN DEBIAN_FRONTEND='noninteractive'               && \
 ENV LC_ALL C.UTF-8
 RUN echo LC_ALL="$LC_ALL" > /etc/default/locale
 
-RUN echo 'deb http://vo.ari.uni-heidelberg.de/debian release main'      > /etc/apt/sources.list.d/gavo.list  && \
-    echo 'deb-src http://vo.ari.uni-heidelberg.de/debian release main' >> /etc/apt/sources.list.d/gavo.list  && \
+RUN echo 'deb http://vo.ari.uni-heidelberg.de/debian release main'      \
+        > /etc/apt/sources.list.d/gavo.list                             && \
     wget -qO - http://docs.g-vo.org/archive-key.asc | apt-key add -
 
 RUN sed -i 's/exit 101/exit 0/' /usr/sbin/policy-rc.d
@@ -40,4 +40,3 @@ EXPOSE 80
 COPY src/help.sh /help.sh
 
 CMD ["/bin/bash", "--rcfile", "/help.sh"]
-
