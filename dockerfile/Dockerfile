@@ -11,9 +11,9 @@ MAINTAINER "Carlos Brandt <carloshenriquebrandt at gmail>"
 # # `docker build --build-arg APT_REPO=beta .`
 ARG APT_REPO="release"
 
-RUN DEBIAN_FRONTEND='noninteractive'               && \
-    apt-get update                                 && \
-    apt-get install -y sudo wget vim locales git   && \
+RUN DEBIAN_FRONTEND='noninteractive'                     && \
+    apt-get update                                       && \
+    apt-get install -y sudo wget vim locales git gnupg2  && \
     apt-get clean
 
 # This is the brute-force solution for Debian;
