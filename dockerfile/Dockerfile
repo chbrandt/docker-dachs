@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:stretch 
 
 LABEL Description=DaCHS\ is\ a\ publishing\ infrastructure\ for\ the\ Virtual\ Observatory. \
       Author=Markus\ Demleitner \
@@ -6,6 +6,10 @@ LABEL Description=DaCHS\ is\ a\ publishing\ infrastructure\ for\ the\ Virtual\ O
       Reference=http://arxiv.org/abs/1408.5733
 
 MAINTAINER "Carlos Brandt <carloshenriquebrandt at gmail>"
+
+# BUILD-time arguments; to use GAVO's "beta" repo, for instance,
+# # `docker build --build-arg APT_REPO=beta .`
+ARG APT_REPO="release"
 
 RUN DEBIAN_FRONTEND='noninteractive'               && \
     apt-get update                                 && \
@@ -18,8 +22,8 @@ RUN DEBIAN_FRONTEND='noninteractive'               && \
 ENV LC_ALL C.UTF-8
 RUN echo LC_ALL="$LC_ALL" > /etc/default/locale
 
-RUN echo 'deb http://vo.ari.uni-heidelberg.de/debian release main'      \
-        > /etc/apt/sources.list.d/gavo.list                             && \
+RUN echo "deb http://vo.ari.uni-heidelberg.de/debian ${APT_REPO} main" \
+        > /etc/apt/sources.list.d/gavo.list                         && \
     wget -qO - http://docs.g-vo.org/archive-key.asc | apt-key add -
 
 RUN sed -i 's/exit 101/exit 0/' /usr/sbin/policy-rc.d
@@ -30,10 +34,11 @@ RUN DEBIAN_FRONTEND='noninteractive'            && \
     apt-get clean                               && \
     gavo serve stop && service postgresql stop
 
-COPY etc/gavo.rc /etc/gavo.rc
+ENV GAVO_ROOT="/var/gavo"                       \
+    GAVO_INPUTS="${GAVO_ROOT}/inputs"           \
+    GAVOSETTINGS="${GAVO_ROOT}/etc/gavo.rc" 
 
-ENV GAVO_ROOT=/var/gavo
-ENV GAVO_INPUTS=$GAVO_ROOT/inputs
+COPY etc/gavo.rc "$GAVOSETTINGS"
 
 EXPOSE 80
 
