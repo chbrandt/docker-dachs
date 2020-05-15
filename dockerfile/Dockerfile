@@ -1,4 +1,4 @@
-FROM debian:stretch 
+FROM debian:stretch
 
 LABEL Description=DaCHS\ is\ a\ publishing\ infrastructure\ for\ the\ Virtual\ Observatory. \
       Author=Markus\ Demleitner \
@@ -19,24 +19,28 @@ RUN DEBIAN_FRONTEND='noninteractive'                     && \
 # This is the brute-force solution for Debian;
 # I am having problems in set locales non-interactively,
 # and since I really need the "C/UTF8" for postgres, will just set it for all.
-ENV LC_ALL C.UTF-8
+ENV LC_ALL=C.UTF-8
 RUN echo LC_ALL="$LC_ALL" > /etc/default/locale
+
+RUN sed -i 's/exit 101/exit 0/' /usr/sbin/policy-rc.d
 
 RUN echo "deb http://vo.ari.uni-heidelberg.de/debian ${APT_REPO} main" \
         > /etc/apt/sources.list.d/gavo.list                         && \
     wget -qO - http://docs.g-vo.org/archive-key.asc | apt-key add -
 
-RUN sed -i 's/exit 101/exit 0/' /usr/sbin/policy-rc.d
+#RUN sed -i 's/exit 101/exit 0/' /usr/sbin/policy-rc.d
 
 RUN DEBIAN_FRONTEND='noninteractive'            && \
     apt-get update                              && \
-    apt-get install -y gavodachs-server         && \
+    apt-get install -y gavodachs2-server         && \
     apt-get clean                               && \
     gavo serve stop && service postgresql stop
 
-ENV GAVO_ROOT="/var/gavo"                       \
-    GAVO_INPUTS="${GAVO_ROOT}/inputs"           \
-    GAVOSETTINGS="${GAVO_ROOT}/etc/gavo.rc" 
+ENV GAVO_ROOT="/var/gavo"
+
+ENV GAVO_INPUTS="${GAVO_ROOT}/inputs"           \
+    GAVOSETTINGS="${GAVO_ROOT}/etc/gavo.rc"     \
+    GAVO_SETTINGS=$GAVOSETTINGS
 
 COPY etc/gavo.rc "$GAVOSETTINGS"
 
